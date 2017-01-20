@@ -875,9 +875,9 @@ VmDirBervalContentDup(
     );
 
 DWORD
-VmDirNewEntry(
-    PCSTR pszDn,
-    PVDIR_ENTRY* ppEntry
+VmDirInitializeEntryFromDN(
+    PVDIR_ENTRY pEntry,
+    PCSTR       pszDN
     );
 
 DWORD

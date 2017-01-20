@@ -960,19 +960,21 @@ VmDirFreeBervalContent(
 }
 
 DWORD
-VmDirNewEntry(
-    PCSTR pszDn,
-    PVDIR_ENTRY* ppEntry
+VmDirInitializeEntryFromDN(
+    PVDIR_ENTRY pEntry,
+    PCSTR       pszDN
     )
 {
     DWORD dwError = 0;
     PVDIR_SCHEMA_CTX pSchemaCtx = NULL;
-    PVDIR_ENTRY pEntry = NULL;
+
+    if (pEntry == NULL || pszDN == NULL)
+    {
+        dwError = VMDIR_ERROR_INVALID_PARAMETER;
+        BAIL_ON_VMDIR_ERROR(dwError);
+    }
 
     dwError = VmDirSchemaCtxAcquire(&pSchemaCtx);
-    BAIL_ON_VMDIR_ERROR(dwError);
-
-    dwError = VmDirAllocateMemory(sizeof(VDIR_ENTRY), (PVOID*) &pEntry);
     BAIL_ON_VMDIR_ERROR(dwError);
 
     pEntry->allocType = ENTRY_STORAGE_FORMAT_NORMAL;
@@ -985,7 +987,7 @@ VmDirNewEntry(
     }
 
     dwError = VmDirAllocateStringA(
-            pszDn,
+            pszDN,
             &pEntry->dn.lberbv.bv_val);
     BAIL_ON_VMDIR_ERROR(dwError);
 
@@ -995,8 +997,6 @@ VmDirNewEntry(
     dwError = VmDirNormalizeDN( &(pEntry->dn), pEntry->pSchemaCtx );
     BAIL_ON_VMDIR_ERROR(dwError);
 
-    *ppEntry = pEntry;
-
 cleanup:
     if (pSchemaCtx)
     {
@@ -1004,10 +1004,6 @@ cleanup:
     }
     return dwError;
 error:
-    if (pEntry)
-    {
-        VmDirFreeEntry(pEntry);
-    }
     goto cleanup;
 }
 
