@@ -3729,124 +3729,6 @@ error:
 }
 
 DWORD
-VmDirGetServerAccountDN(
-    PCSTR pszDomain,
-    PCSTR pszMachineName,
-    PSTR* ppszServerDN
-    )
-{
-    DWORD dwError = 0;
-    PSTR  pszDomainDN = NULL;
-    PSTR  pszServerDN = NULL;
-
-    if (IsNullOrEmptyString(pszDomain) ||
-        IsNullOrEmptyString(pszMachineName) ||
-        !ppszServerDN)
-    {
-        dwError = ERROR_INVALID_PARAMETER;
-        BAIL_ON_VMDIR_ERROR(dwError);
-    }
-
-    dwError = VmDirSrvCreateDomainDN(pszDomain, &pszDomainDN);
-    BAIL_ON_VMDIR_ERROR(dwError);
-
-    dwError = VmDirAllocateStringPrintf(
-                    &pszServerDN,
-                    "CN=%s,OU=%s,%s",
-                    pszMachineName,
-                    VMDIR_DOMAIN_CONTROLLERS_RDN_VAL,
-                    pszDomainDN);
-    BAIL_ON_VMDIR_ERROR(dwError);
-
-    *ppszServerDN = pszServerDN;
-
-cleanup:
-
-    VMDIR_SAFE_FREE_MEMORY(pszDomainDN);
-
-    return dwError;
-
-error:
-
-    if (ppszServerDN)
-    {
-        *ppszServerDN = NULL;
-    }
-
-    VMDIR_SAFE_FREE_MEMORY(pszServerDN);
-
-    goto cleanup;
-}
-
-/*
- * query single attribute value of a DN via ldap
- * "*ppByte" is NULL terminated.
- */
-DWORD
-VmDirLdapGetSingleAttribute(
-    LDAP*   pLD,
-    PCSTR   pszDN,
-    PCSTR   pszAttr,
-    PBYTE*  ppByte,
-    DWORD*  pdwLen
-    )
-{
-    DWORD           dwError=0;
-    PBYTE           pLocalByte = NULL;
-    BerValue**      ppBerValues = NULL;
-
-    if ( !pLD || !pszDN || !pszAttr || !ppByte || !pdwLen )
-    {
-        dwError = VMDIR_ERROR_INVALID_PARAMETER;
-        BAIL_ON_VMDIR_ERROR(dwError);
-    }
-
-    dwError = VmDirLdapGetAttributeValues(
-                                        pLD,
-                                        pszDN,
-                                        pszAttr,
-                                        NULL,
-                                        &ppBerValues);
-    BAIL_ON_VMDIR_ERROR(dwError);
-
-    if ( ppBerValues[0] == NULL || ppBerValues[0]->bv_val == NULL )
-    {
-        dwError = VMDIR_ERROR_NO_SUCH_ATTRIBUTE;
-        BAIL_ON_VMDIR_ERROR(dwError);
-    }
-
-    if ( ppBerValues[1] != NULL )   // more than one attribute value
-    {
-        dwError = VMDIR_ERROR_INVALID_RESULT;
-        BAIL_ON_VMDIR_ERROR(dwError);
-    }
-
-    dwError = VmDirAllocateAndCopyMemory(
-                            ppBerValues[0]->bv_val,
-                            ppBerValues[0]->bv_len + 1,
-                            (PVOID*)&pLocalByte);
-    BAIL_ON_VMDIR_ERROR(dwError);
-
-    *ppByte = pLocalByte;
-    *pdwLen = (DWORD)ppBerValues[0]->bv_len;
-    pLocalByte = NULL;
-
-cleanup:
-
-    VMDIR_SAFE_FREE_MEMORY(pLocalByte);
-    if(ppBerValues)
-    {
-        ldap_value_free_len(ppBerValues);
-    }
-
-    return dwError;
-
-error:
-
-    goto cleanup;
-}
-
-DWORD
 VmDirLdapGetAttributeValues(
     LDAP* pLd,
     PCSTR pszDN,
@@ -3904,6 +3786,40 @@ error:
     }
 
     VMDIR_LOG_ERROR( VMDIR_LOG_MASK_ALL, "VmDirLdapGetAttributeValues failed. Error(%u)", dwError);
+    goto cleanup;
+}
+
+DWORD
+VmDirLdapWriteAttributeValues(
+    LDAP* pLd,
+    PCSTR pszDN,
+    PCSTR pszAttribute,
+    PCSTR pszValue
+    )
+{
+    DWORD       dwError = 0;
+    LDAPMod     mod = {0};
+    LDAPMod*    mods[2] = {&mod, NULL};
+    PSTR        vals[2] = {(PSTR)pszValue, NULL};
+
+    mod.mod_op = LDAP_MOD_ADD;
+    mod.mod_type = (PSTR)pszAttribute;
+    mod.mod_vals.modv_strvals = vals;
+
+    VMDIR_LOG_VERBOSE(VMDIR_LOG_MASK_ALL, "Add %s - %s:%s", pszDN, pszAttribute, pszValue);
+
+    dwError = ldap_modify_ext_s(
+                            pLd,
+                            pszDN,
+                            mods,
+                            NULL,
+                            NULL);
+    BAIL_ON_VMDIR_ERROR(dwError);
+
+cleanup:
+    return dwError;
+error:
+    VMDIR_LOG_ERROR(VMDIR_LOG_MASK_ALL, "VmDirLdapWriteAttributeValues failed. Error(%u)", dwError);
     goto cleanup;
 }
 
@@ -3975,6 +3891,8 @@ error:
     *ppszServerName = NULL;
     VMDIR_SAFE_FREE_MEMORY(pszServerName);
 
-    VMDIR_LOG_ERROR(VMDIR_LOG_MASK_ALL, "VmDirGetServerName failed with error (%u)", dwError);
+    VMDIR_LOG_ERROR(VMDIR_LOG_MASK_ALL,
+            "%s failed with error (%u)", __FUNCTION__, dwError);
     goto cleanup;
 }
+

@@ -38,7 +38,16 @@ vmdird_SOURCES = \
     tenantmgmt.c \
     tombstone.c \
     tracklastlogin.c \
-    vmdirurgentrepl_sstub.c
+    vmdirurgentrepl_sstub.c \
+    vmdir_pac_cstub.c \
+    rest/auth.c \
+    rest/http.c \
+    rest/api.c \
+    rest/utils.c  \
+    rest/helpers.c \
+    rest/replication.c \
+    rest/response.c \
+    rest/request.c
 
 VMDIRD_BACKEND_INCLUDES=
 VMDIRD_BACKEND_LD_FLAGS=
@@ -57,7 +66,10 @@ vmdird_CPPFLAGS = \
     @DCERPC_INCLUDES@ \
     @LW_INCLUDES@ \
     @OPENSSL_INCLUDES@ \
-    @VMEVENT_INCLUDES@
+    @VMEVENT_INCLUDES@ \
+    @TRIDENT_INCLUDES@ \
+    @JANSSON_INCLUDES@ \
+    @COPENAPI_INCLUDES@
 
 vmdird_LDADD = \
     $(top_builddir)/server/vmkdc/libvmkdcserv.la \
@@ -90,13 +102,20 @@ vmdird_LDADD = \
     @LBER_LIBS@ \
     @CRYPTO_LIBS@ \
     @CRYPT_LIBS@ \
-    @PTHREAD_LIBS@
+    @PTHREAD_LIBS@ \
+    @LIBCURL_LIBS@ \
+    @TRIDENT_LIBS@ \
+    @JANSSON_LIBS@ \
+    @COPENAPI_LIBS@
 
 vmdird_LDFLAGS = \
     -rdynamic -ldl \
     $(VMDIRD_BACKEND_LD_FLAGS) \
     @OPENSSL_LDFLAGS@ \
-    @LW_LDFLAGS@
+    @LW_LDFLAGS@ \
+    @TRIDENT_LDFLAGS@ \
+    @JANSSON_LDFLAGS@ \
+    @COPENAPI_LDFLAGS@
 
 CLEANFILES = \
     vmdir_h.h \

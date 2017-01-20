@@ -29,6 +29,18 @@ BuildRequires:  coreutils >= 8.22, openssl-devel >= 1.0.2, krb5 >= 1.14, cyrus-s
 %define _vmevent_prefix /opt/vmware
 %endif
 
+%if 0%{?_trident_prefix:1} == 0
+%define _trident_prefix /usr
+%endif
+
+%if 0%{?_jansson_prefix:1} == 0
+%define _jansson_prefix /usr
+%endif
+
+%if 0%{?_copenapi_prefix:1} == 0
+%define _copenapi_prefix /usr
+%endif
+
 %define _dbdir %{_localstatedir}/lib/vmware/vmdir
 %define _sasl2dir %{_sasl_prefix}/lib64/sasl2
 %define _krb5_lib_dir %{_krb5_prefix}/lib64
@@ -64,6 +76,9 @@ autoreconf -mif ..
     --with-sasl=%{_sasl_prefix} \
     --with-datastore=mdb \
     --with-vmevent=%{_vmevent_prefix} \
+    --with-trident=%{_trident_prefix} \
+    --with-jansson=%{_jansson_prefix} \
+    --with-copenapi=%{_copenapi_prefix} \
     --enable-server=yes \
     --with-version=%{_version}
 

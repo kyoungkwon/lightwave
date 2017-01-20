@@ -45,6 +45,7 @@ main(
     int          iLocalLogMask = 0;
     BOOLEAN      bVmDirInit = FALSE;
     BOOLEAN      bShutdownKDCService = FALSE;
+    BOOLEAN      bShutdownHttpService = FALSE;
     BOOLEAN      bWaitTimeOut = FALSE;
 
     dwError = VmDirSrvUpdateConfig();
@@ -102,6 +103,12 @@ main(
 
         VMDIR_LOG_INFO( VMDIR_LOG_MASK_ALL, "Lotus Vmkdcd: running...");
 
+        dwError = VmDirHttpServiceStartup();
+        BAIL_ON_VMDIR_ERROR(dwError);
+        bShutdownHttpService = TRUE;
+
+        VMDIR_LOG_INFO( VMDIR_LOG_MASK_ALL, "VmDir: HttpService running...");
+
         dwError = VmDirNotifyLikewiseServiceManager();
         BAIL_ON_VMDIR_ERROR(dwError);
 
@@ -119,34 +126,39 @@ main(
 
 cleanup:
 
-   if ( bShutdownKDCService )
-   {
-       VmKdcServiceShutdown();
-       VMDIR_LOG_INFO( VMDIR_LOG_MASK_ALL, "Lotus Vmkdcd: stop" );
-   }
+    if (bShutdownHttpService)
+    {
+        VmDirHttpServiceShutdown();
+        VMDIR_LOG_INFO( VMDIR_LOG_MASK_ALL, "VmDir: HttpService Shutdown" );
+    }
 
-   if ( bVmDirInit )
-   {
-       VmDirdStateSet(VMDIRD_STATE_SHUTDOWN);
-       VmDirShutdown(&bWaitTimeOut);
-       if (bWaitTimeOut)
-       {
-           VMDIR_LOG_INFO( VMDIR_LOG_MASK_ALL, "Lotus Vmdird: stop" );
-           goto done;
-       }
+    if ( bShutdownKDCService )
+    {
+        VmKdcServiceShutdown();
+        VMDIR_LOG_INFO( VMDIR_LOG_MASK_ALL, "Lotus Vmkdcd: stop" );
+    }
 
-       VMDIR_LOG_INFO( VMDIR_LOG_MASK_ALL, "Lotus Vmdird: stop" );
-   }
+    if ( bVmDirInit )
+    {
+        VmDirdStateSet(VMDIRD_STATE_SHUTDOWN);
+        VmDirShutdown(&bWaitTimeOut);
+        if (bWaitTimeOut)
+        {
+            VMDIR_LOG_INFO( VMDIR_LOG_MASK_ALL, "Lotus Vmdird: stop" );
+            goto done;
+        }
 
-   VmDirLogTerminate();
+        VMDIR_LOG_INFO( VMDIR_LOG_MASK_ALL, "Lotus Vmdird: stop" );
+    }
 
-   VmDirSrvFreeConfig();
+    VmDirLogTerminate();
+
+    VmDirSrvFreeConfig();
 
 done:
-   return dwError;
+    return dwError;
 
 error:
-
     goto cleanup;
 }
 

@@ -70,6 +70,16 @@
 #include <ldaphead.h>
 #include <vmevent.h>
 
+#include <curl/curl.h>
+#include <gssapi/gssapi.h>
+#include <gssapi/gssapi_ext.h>
+#include <jansson.h>
+#include <vmware-rest/vmrest.h>
+
+#include "rest/defines.h"
+#include "rest/structs.h"
+#include "rest/prototypes.h"
+
 #include "defines.h"
 #include "structs.h"
 
@@ -81,7 +91,6 @@
 #include "vmdirurgentrepl_h.h"
 
 #include "prototypes.h"
-
 #include "externs.h"
 
 #else

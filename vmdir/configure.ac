@@ -271,6 +271,59 @@ AC_SUBST(SASL_LDFLAGS)
 
 AC_DEFINE_UNQUOTED(VMDIR_CONFIG_SASL2_LIB_PATH, "$SASL_PLUGINSPATH", [SASL2 Library path])
 
+# libcurl
+
+PKG_CHECK_MODULES([LIBCURL], [libcurl], [have_libcurl=yes], [have_libcurl=no])
+AM_CONDITIONAL([LIBCURL],  [test "$have_libcurl" = "yes"])
+
+# Trident
+
+AC_ARG_WITH([trident],
+    [AC_HELP_STRING([--with-trident=<dir>], [use trident-server binaries rooted at prefix <dir> ])],
+    [
+        TRIDENT_BASE_PATH="$withval"
+        TRIDENT_INCLUDES="-I$withval/include"
+        TRIDENT_LDFLAGS="-L$withval/$PLATFORM_LIB_PREFIX"
+    ])
+
+TRIDENT_LIBS="-lrestengine"
+AC_CHECK_HEADERS(vmrest.h)
+AC_SUBST(TRIDENT_BASE_PATH)
+AC_SUBST(TRIDENT_INCLUDES)
+AC_SUBST(TRIDENT_LDFLAGS)
+
+# Jansson
+
+AC_ARG_WITH([jansson],
+    [AC_HELP_STRING([--with-jansson=<dir>], [use jansson binaries rooted at prefix <dir> ])],
+    [
+        JANSSON_BASE_PATH="$withval"
+        JANSSON_INCLUDES="-I$withval/include"
+        JANSSON_LDFLAGS="-L$withval/lib"
+    ])
+
+JANSSON_LIBS="-ljansson"
+AC_CHECK_HEADERS(jansson.h)
+AC_SUBST(JANSSON_BASE_PATH)
+AC_SUBST(JANSSON_INCLUDES)
+AC_SUBST(JANSSON_LDFLAGS)
+
+# Copenapi
+
+AC_ARG_WITH([copenapi],
+    [AC_HELP_STRING([--with-copenapi=<dir>], [use copenapi binaries rooted at prefix <dir> ])],
+    [
+        COPENAPI_BASE_PATH="$withval"
+        COPENAPI_INCLUDES="-I$withval/include"
+        COPENAPI_LDFLAGS="-L$withval/lib"
+    ])
+
+COPENAPI_LIBS="-lcopenapi"
+AC_CHECK_HEADERS(copenapi.h)
+AC_SUBST(COPENAPI_BASE_PATH)
+AC_SUBST(COPENAPI_INCLUDES)
+AC_SUBST(COPENAPI_LDFLAGS)
+
 # Likewise components
 
 case "${host_os}:${host_cpu}" in
@@ -488,6 +541,9 @@ AC_SUBST(LBER_LIBS)
 AC_SUBST(SHADOW_LIBS)
 AC_SUBST(CRYPT_LIBS)
 AC_SUBST(SASL_LIBS)
+AC_SUBST(TRIDENT_LIBS)
+AC_SUBST(JANSSON_LIBS)
+AC_SUBST(COPENAPI_LIBS)
 
 AC_PATH_PROG([IDL], [dceidl], [no], [$PATH:$DCERPC_PATH])
 

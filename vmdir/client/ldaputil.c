@@ -275,41 +275,6 @@ error:
     goto cleanup;
 }
 
-static
-DWORD
-VmDirLdapWriteAttributeValues(
-    LDAP* pLd,
-    PCSTR pszDN,
-    PCSTR pszAttribute,
-    PCSTR pszValue
-    )
-{
-    DWORD       dwError = 0;
-    LDAPMod     mod = {0};
-    LDAPMod*    mods[2] = {&mod, NULL};
-    PSTR        vals[2] = {(PSTR)pszValue, NULL};
-
-    mod.mod_op = LDAP_MOD_ADD;
-    mod.mod_type = (PSTR)pszAttribute;
-    mod.mod_vals.modv_strvals = vals;
-
-    VMDIR_LOG_VERBOSE(VMDIR_LOG_MASK_ALL, "Add %s - %s:%s", pszDN, pszAttribute, pszValue);
-
-    dwError = ldap_modify_ext_s(
-                            pLd,
-                            pszDN,
-                            mods,
-                            NULL,
-                            NULL);
-    BAIL_ON_VMDIR_ERROR(dwError);
-
-cleanup:
-    return dwError;
-error:
-    VMDIR_LOG_ERROR(VMDIR_LOG_MASK_ALL, "VmDirLdapWriteAttributeValues failed. Error(%u)", dwError);
-    goto cleanup;
-}
-
 /*
  * Helper function
  * Get first attribute from pEntry to pszAttrTarget which is CHAR array on stack
