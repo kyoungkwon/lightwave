@@ -2229,51 +2229,6 @@ VmDirSetDomainFuncLvlInternal(
     DWORD dwFuncLvl
     );
 
-DWORD
-<<<<<<< f0ed935936ff625404f4281320fbb1822f2c960a
-VmDirGetServerAccountDN(
-    PCSTR pszDomain,
-    PCSTR pszMachineName,
-    PSTR* ppszServerDN
-    );
-
-DWORD
-VmDirLdapGetSingleAttribute(
-    LDAP*   pLD,
-    PCSTR   pszDN,
-    PCSTR   pszAttr,
-    PBYTE*  ppByte,
-    DWORD*  pdwLen
-    );
-
-DWORD
-=======
->>>>>>> Porting rest code from perforce (lotus-vmdir-staging)
-VmDirLdapGetAttributeValues(
-    LDAP* pLd,
-    PCSTR pszDN,
-    PCSTR pszAttribute,
-    LDAPControl** ppSrvCtrls,
-    BerValue*** pppBerValues
-    );
-
-DWORD
-<<<<<<< f0ed935936ff625404f4281320fbb1822f2c960a
-=======
-VmDirLdapWriteAttributeValues(
-    LDAP* pLd,
-    PCSTR pszDN,
-    PCSTR pszAttribute,
-    PCSTR pszValue
-    );
-
-DWORD
->>>>>>> Porting rest code from perforce (lotus-vmdir-staging)
-VmDirGetServerName(
-    PCSTR pszHostName,
-    PSTR* ppszServerName
-    );
-
 #ifdef __cplusplus
 }
 #endif

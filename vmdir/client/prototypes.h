@@ -213,6 +213,11 @@ VmDirGetDomainName(
     PSTR* ppszDomainName);
 
 DWORD
+VmDirGetServerName(
+    PCSTR pszHostName,
+    PSTR* ppszServerName);
+
+DWORD
 VmDirGetLocalLduGuid(
     PSTR pszLduGuid
     );

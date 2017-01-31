@@ -1,3 +1,4 @@
+.gitignore
 tools/win/VMDirSnapIn/VMDirSnapIn.userprefs
 tools/mac/VMCASnapIn/LightwaveCA.userprefs
 tools/mac/VMPSCHighAvailabilitySnapIn/Lightwave PSC Site Management.userprefs
@@ -98,3 +99,31 @@ tools/win/wininstaller/wininstaller.v12.suo
 */build/libtool
 */build/Makefile
 stage/*
+.cproject
+.project
+.settings/
+Debug/
+build/
+config/aclocal.m4
+config/ar-lib
+config/build/
+config/build/vmware-config/
+lwraft/aclocal.m4
+lwraft/ar-lib
+lwraft/build/
+vmafd/aclocal.m4
+vmafd/ar-lib
+vmafd/build/
+vmca/aclocal.m4
+vmca/ar-lib
+vmca/build/
+vmdir/aclocal.m4
+vmdir/ar-lib
+vmdir/build/
+vmdns/aclocal.m4
+vmdns/ar-lib
+vmdns/build/
+vmevent/aclocal.m4
+vmevent/build/include/
+vmidentity/
+vmdir/config/._vmdir-rest.json
