@@ -875,12 +875,6 @@ VmDirBervalContentDup(
     );
 
 DWORD
-VmDirInitializeEntryFromDN(
-    PVDIR_ENTRY pEntry,
-    PCSTR       pszDN
-    );
-
-DWORD
 VmDirAttrListToNewEntry(
     PVDIR_SCHEMA_CTX    pSchemaCtx,
     PSTR                pszDN,

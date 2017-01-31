@@ -1,0 +1,228 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Lightwave VmDir API",
+        "version": "1.0.0"
+    },
+    "schemes": [
+        "https"
+    ],
+    "host": "IPADDRESS_MARKER:7477",
+    "basePath": "/v1",
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/vmdir/ldap": {
+            "put": {
+                "summary": "Add an LDAP entry",
+                "parameters": [
+                    {
+                        "name": "entry",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/LDAPEntry"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Generic LDAP response",
+                        "schema": {
+                            "$ref": "#/definitions/GenericResponse"
+                        }
+                    }
+                },
+                "tags": [
+                    "LDAP"
+                ]
+            },
+            "get": {
+                "summary": "Search for LDAP entries",
+                "parameters": [
+                    {
+                        "name": "dn",
+                        "in": "query",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "scope",
+                        "in": "query",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "attrs",
+                        "in": "query",
+                        "required": false,
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    {
+                        "name": "page_results_cookie",
+                        "in": "query",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Generic LDAP response with an array of LDAP entries",
+                        "schema": {
+                            "$ref": "#/definitions/LDAPSearchResponse"
+                        }
+                    }
+                },
+                "tags": [
+                    "LDAP"
+                ]
+            },
+            "patch": {
+                "summary": "Modify an LDAP entry",
+                "parameters": [
+                    {
+                        "name": "dn",
+                        "in": "query",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "mods",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/LDAPMod"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Generic LDAP response",
+                        "schema": {
+                            "$ref": "#/definitions/GenericResponse"
+                        }
+                    }
+                },
+                "tags": [
+                    "LDAP"
+                ]
+            },
+            "delete": {
+                "summary": "Delete an LDAP entry",
+                "parameters": [
+                    {
+                        "name": "dn",
+                        "in": "query",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Generic LDAP response",
+                        "schema": {
+                            "$ref": "#/definitions/GenericResponse"
+                        }
+                    }
+                },
+                "tags": [
+                    "LDAP"
+                ]
+            }
+        }
+    },
+    "definitions": {
+        "GenericResponse": {
+            "type": "object",
+            "properties": {
+                "error_code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "error_message": {
+                    "type": "string"
+                }
+            }
+        },
+        "LDAPEntry": {
+            "type": "object",
+            "properties": {
+                "dn": {
+                    "type": "string"
+                },
+                "attributes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/LDAPAttribute"
+                    }
+                }
+            }
+        },
+        "LDAPAttribute": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "LDAPMod": {
+            "type": "object",
+            "properties": {
+                "operation": {
+                    "type": "string"
+                },
+                "attribute": {
+                    "$ref": "#/definitions/LDAPAttribute"
+                }
+            }
+        },
+        "LDAPSearchResponse": {
+            "type": "object",
+            "properties": {
+                "generic_response": {
+                    "$ref": "#/definitions/GenericResponse"
+                },
+                "paged_results_cookie": {
+                    "type": "string"
+                },
+                "result_count": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "result": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/LDAPEntry"
+                    }
+                }
+            }
+        }
+    }
+}

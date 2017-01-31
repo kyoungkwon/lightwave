@@ -275,6 +275,103 @@ error:
     goto cleanup;
 }
 
+static
+DWORD
+VmDirLdapGetAttributeValues(
+    LDAP* pLd,
+    PCSTR pszDN,
+    PCSTR pszAttribute,
+    LDAPControl** ppSrvCtrls,
+    BerValue*** pppBerValues
+    )
+{
+    DWORD           dwError = 0;
+    PCSTR           ppszAttrs[] = {pszAttribute, NULL};
+    LDAPMessage*    pSearchRes = NULL;
+    LDAPMessage*    pEntry = NULL;
+    BerValue**      ppBerValues = NULL;
+
+    dwError = ldap_search_ext_s(
+                            pLd,
+                            pszDN,
+                            LDAP_SCOPE_BASE,
+                            NULL,       /* filter */
+                            (PSTR*)ppszAttrs,
+                            FALSE,      /* attrsonly */
+                            ppSrvCtrls, /* serverctrls */
+                            NULL,       /* clientctrls */
+                            NULL,       /* timeout */
+                            0,         /* sizelimit */
+                            &pSearchRes);
+    BAIL_ON_VMDIR_ERROR(dwError);
+
+    pEntry = ldap_first_entry(pLd, pSearchRes);
+    if (!pEntry)
+    {
+        dwError = LDAP_NO_SUCH_ATTRIBUTE;
+    }
+    BAIL_ON_VMDIR_ERROR(dwError);
+
+    ppBerValues = ldap_get_values_len(pLd, pEntry, pszAttribute);
+    if (!ppBerValues)
+    {
+        dwError = LDAP_NO_SUCH_ATTRIBUTE;
+    }
+    BAIL_ON_VMDIR_ERROR(dwError);
+
+    *pppBerValues = ppBerValues;
+cleanup:
+    if (pSearchRes)
+    {
+        ldap_msgfree(pSearchRes);
+    }
+    return dwError;
+error:
+    *pppBerValues = NULL;
+    if(ppBerValues)
+    {
+        ldap_value_free_len(ppBerValues);
+    }
+
+    VMDIR_LOG_ERROR( VMDIR_LOG_MASK_ALL, "VmDirLdapGetAttributeValues failed. Error(%u)", dwError);
+    goto cleanup;
+}
+
+static
+DWORD
+VmDirLdapWriteAttributeValues(
+    LDAP* pLd,
+    PCSTR pszDN,
+    PCSTR pszAttribute,
+    PCSTR pszValue
+    )
+{
+    DWORD       dwError = 0;
+    LDAPMod     mod = {0};
+    LDAPMod*    mods[2] = {&mod, NULL};
+    PSTR        vals[2] = {(PSTR)pszValue, NULL};
+
+    mod.mod_op = LDAP_MOD_ADD;
+    mod.mod_type = (PSTR)pszAttribute;
+    mod.mod_vals.modv_strvals = vals;
+
+    VMDIR_LOG_VERBOSE(VMDIR_LOG_MASK_ALL, "Add %s - %s:%s", pszDN, pszAttribute, pszValue);
+
+    dwError = ldap_modify_ext_s(
+                            pLd,
+                            pszDN,
+                            mods,
+                            NULL,
+                            NULL);
+    BAIL_ON_VMDIR_ERROR(dwError);
+
+cleanup:
+    return dwError;
+error:
+    VMDIR_LOG_ERROR(VMDIR_LOG_MASK_ALL, "VmDirLdapWriteAttributeValues failed. Error(%u)", dwError);
+    goto cleanup;
+}
+
 /*
  * Helper function
  * Get first attribute from pEntry to pszAttrTarget which is CHAR array on stack
@@ -1269,6 +1366,78 @@ cleanup:
 
 error:
     VMDIR_LOG_ERROR(VMDIR_LOG_MASK_ALL, "VmDirCreateCMSubtree failed. Error(%u)", dwError);
+    goto cleanup;
+}
+
+
+DWORD
+VmDirGetServerName(
+    PCSTR pszHostName,
+    PSTR* ppszServerName)
+{
+    DWORD       dwError = 0;
+    PSTR        pszHostURI = NULL;
+    LDAP*       pLd = NULL;
+    PSTR        pszServerName = NULL;
+    BerValue**  ppBerValues = NULL;
+
+    if (IsNullOrEmptyString(pszHostName) || ppszServerName == NULL)
+    {
+        dwError =  LDAP_INVALID_SYNTAX;
+        BAIL_ON_VMDIR_ERROR(dwError);
+    }
+
+    if ( VmDirIsIPV6AddrFormat( pszHostName ) )
+    {
+        dwError = VmDirAllocateStringPrintf( &pszHostURI, "%s://[%s]:%d",
+                                                 VMDIR_LDAP_PROTOCOL,
+                                                 pszHostName,
+                                                 DEFAULT_LDAP_PORT_NUM);
+    }
+    else
+    {
+        dwError = VmDirAllocateStringPrintf( &pszHostURI, "%s://%s:%d",
+                                                 VMDIR_LDAP_PROTOCOL,
+                                                 pszHostName,
+                                                 DEFAULT_LDAP_PORT_NUM);
+    }
+    BAIL_ON_VMDIR_ERROR(dwError);
+
+    dwError = VmDirAnonymousLDAPBind( &pLd, pszHostURI );
+    BAIL_ON_VMDIR_ERROR(dwError);
+
+    dwError = VmDirLdapGetAttributeValues(
+                                pLd,
+                                "",
+                                ATTR_SERVER_NAME,
+                                NULL,
+                                &ppBerValues);
+    BAIL_ON_VMDIR_ERROR(dwError);
+
+    dwError = VmDirDnLastRDNToCn(ppBerValues[0]->bv_val, &pszServerName);
+    BAIL_ON_VMDIR_ERROR(dwError);
+
+    *ppszServerName = pszServerName;
+
+cleanup:
+    VMDIR_SAFE_FREE_MEMORY(pszHostURI);
+
+    if (pLd)
+    {
+        ldap_unbind_ext_s(pLd, NULL, NULL);
+    }
+
+    if(ppBerValues)
+    {
+        ldap_value_free_len(ppBerValues);
+    }
+
+    return dwError;
+error:
+    *ppszServerName = NULL;
+    VMDIR_SAFE_FREE_MEMORY(pszServerName);
+
+    VMDIR_LOG_ERROR(VMDIR_LOG_MASK_ALL, "VmDirGetServerName failed with error (%u)", dwError);
     goto cleanup;
 }
 

@@ -2229,29 +2229,6 @@ VmDirSetDomainFuncLvlInternal(
     DWORD dwFuncLvl
     );
 
-DWORD
-VmDirLdapGetAttributeValues(
-    LDAP* pLd,
-    PCSTR pszDN,
-    PCSTR pszAttribute,
-    LDAPControl** ppSrvCtrls,
-    BerValue*** pppBerValues
-    );
-
-DWORD
-VmDirLdapWriteAttributeValues(
-    LDAP* pLd,
-    PCSTR pszDN,
-    PCSTR pszAttribute,
-    PCSTR pszValue
-    );
-
-DWORD
-VmDirGetServerName(
-    PCSTR pszHostName,
-    PSTR* ppszServerName
-    );
-
 #ifdef __cplusplus
 }
 #endif

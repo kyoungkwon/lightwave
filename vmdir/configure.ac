@@ -294,11 +294,11 @@ AC_ARG_WITH([trident],
     [
         TRIDENT_BASE_PATH="$withval"
         TRIDENT_INCLUDES="-I$withval/include"
-        TRIDENT_LDFLAGS="-L$withval/$PLATFORM_LIB_PREFIX"
+        TRIDENT_LDFLAGS="-L$withval/lib64"
     ])
 
 TRIDENT_LIBS="-lrestengine"
-AC_CHECK_HEADERS(vmrest.h)
+AC_CHECK_HEADERS(vmware-rest/vmrest.h)
 AC_SUBST(TRIDENT_BASE_PATH)
 AC_SUBST(TRIDENT_INCLUDES)
 AC_SUBST(TRIDENT_LDFLAGS)
@@ -330,7 +330,7 @@ AC_ARG_WITH([copenapi],
     ])
 
 COPENAPI_LIBS="-lcopenapi"
-AC_CHECK_HEADERS(copenapi.h)
+AC_CHECK_HEADERS(copenapi/copenapi.h)
 AC_SUBST(COPENAPI_BASE_PATH)
 AC_SUBST(COPENAPI_INCLUDES)
 AC_SUBST(COPENAPI_LDFLAGS)
@@ -621,6 +621,7 @@ AC_CONFIG_FILES([Makefile
                  server/acl/Makefile
                  server/ldap-head/Makefile
                  server/replication/Makefile
+                 server/rest-head/Makefile
                  server/saslvmdirdb/Makefile
                  server/vmdir/Makefile
                  client/Makefile

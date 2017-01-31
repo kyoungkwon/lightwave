@@ -24,6 +24,7 @@ SUBDIRS = \
     ldap-head \
     middle-layer \
     replication \
+    rest-head \
     saslvmdirdb \
     schema \
     acl \

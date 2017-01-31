@@ -233,7 +233,6 @@ VmDirPerformSearch(
    int           retVal = LDAP_SUCCESS;
    BerValue*           pLberBerv = NULL;
    PSTR                pszLocalErrorMsg = NULL;
-   BOOLEAN             bResultAlreadySent = FALSE;
    PVDIR_LDAP_RESULT   pResult = &(pOperation->ldapResult);
    BOOLEAN             bSetAccessInfo = FALSE;
 
@@ -331,30 +330,26 @@ VmDirPerformSearch(
    BAIL_ON_VMDIR_ERROR(retVal);
 
    retVal = pResult->errCode = VmDirMLSearch(pOperation);
-   bResultAlreadySent = TRUE;
    BAIL_ON_VMDIR_ERROR(retVal);
 
    retVal = _VmDirLogSearchParameters(pOperation);
    BAIL_ON_VMDIR_ERROR(retVal);
 
 cleanup:
+    if (retVal != LDAP_NOTICE_OF_DISCONNECT)
+    {
+        VmDirSendLdapResult( pOperation );
+    }
     if (bSetAccessInfo)
     {
         VmDirFreeAccessInfo(&pOperation->conn->AccessInfo);
     }
     VMDIR_SAFE_FREE_MEMORY(pLberBerv);
     VMDIR_SAFE_FREE_MEMORY(pszLocalErrorMsg);
-
     return retVal;
 
 error:
-
     VMDIR_APPEND_ERROR_MSG(pResult->pszErrMsg, pszLocalErrorMsg);
-    if (retVal != LDAP_NOTICE_OF_DISCONNECT && bResultAlreadySent == FALSE)
-    {
-        VmDirSendLdapResult( pOperation );
-    }
-
     goto cleanup;
 }
 

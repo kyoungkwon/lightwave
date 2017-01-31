@@ -39,15 +39,7 @@ vmdird_SOURCES = \
     tombstone.c \
     tracklastlogin.c \
     vmdirurgentrepl_sstub.c \
-    vmdir_pac_cstub.c \
-    rest/auth.c \
-    rest/http.c \
-    rest/api.c \
-    rest/utils.c  \
-    rest/helpers.c \
-    rest/replication.c \
-    rest/response.c \
-    rest/request.c
+    vmdir_pac_cstub.c
 
 if HAVE_MDB_STORE
 VMDIRD_BACKEND_INCLUDES=
@@ -68,14 +60,12 @@ vmdird_CPPFLAGS = \
     @DCERPC_INCLUDES@ \
     @LW_INCLUDES@ \
     @OPENSSL_INCLUDES@ \
-    @VMEVENT_INCLUDES@ \
-    @TRIDENT_INCLUDES@ \
-    @JANSSON_INCLUDES@ \
-    @COPENAPI_INCLUDES@
+    @VMEVENT_INCLUDES@
 
 vmdird_LDADD = \
     $(top_builddir)/server/vmkdc/libvmkdcserv.la \
     $(top_builddir)/server/ldap-head/libldap-head.la \
+    $(top_builddir)/server/rest-head/librest-head.la \
     $(top_builddir)/server/indexcfg/libindexcfg.la \
     $(top_builddir)/server/middle-layer/libmiddle-layer.la \
     $(top_builddir)/server/schema/libschema.la \
@@ -105,7 +95,6 @@ vmdird_LDADD = \
     @CRYPTO_LIBS@ \
     @CRYPT_LIBS@ \
     @PTHREAD_LIBS@ \
-    @LIBCURL_LIBS@ \
     @TRIDENT_LIBS@ \
     @JANSSON_LIBS@ \
     @COPENAPI_LIBS@
