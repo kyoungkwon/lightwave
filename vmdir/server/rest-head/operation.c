@@ -172,19 +172,6 @@ VmDirRESTOperationWriteResponse(
     BAIL_ON_VMDIR_ERROR(dwError);
 
 //    TODO use pRestOp->pResult
-//    dwError = VmDirAllocateStringPrintf(&pszResponsePayload,
-//                                            "{\n"
-//                                            "  \"ldap-status\": \"%s\",\n"
-//                                            "  \"error-message\": \"%s\",\n"
-//                                            "  \"additional-info\": \"%s\",\n"
-//                                            "  \"result\": %s\n"
-//                                            "}\n",
-//                                            pRestOp->pResult->pszLdapStatusCode,
-//                                            pRestOp->pResult->pszErrorMessage,
-//                                            pRestOp->pResult->pszAdditionalInfo,
-//                                            pRestOp->pResult->pszResult
-//                                            );
-//    BAIL_ON_VMDIR_ERROR(dwError);
 
     dataLen = VmDirStringLenA(pszData);
 

@@ -42,7 +42,8 @@ VmDirParseJSONToEntry(
 DWORD
 VmDirParseJSONToMods(
     const char*         pszInputJson,
-    PVDIR_MODIFICATION* ppMods
+    PVDIR_MODIFICATION* ppMods,
+    DWORD*              pdwNumMods
     );
 
 // ldapapi.c
@@ -105,6 +106,41 @@ VmDirRESTOperationWriteResponse(
 VOID
 VmDirFreeRESTOperation(
     PVDIR_REST_OPERATION    pRestOp
+    );
+
+// param.c
+DWORD
+VmDirRESTGetStrParam(
+    PVDIR_REST_OPERATION    pRestOp,
+    PSTR                    pszKey,
+    PSTR*                   ppszValue,
+    BOOLEAN                 bRequired
+    );
+
+DWORD
+VmDirRESTGetIntParam(
+    PVDIR_REST_OPERATION    pRestOp,
+    PSTR                    pszKey,
+    int*                    piValue,
+    BOOLEAN                 bRequired
+    );
+
+DWORD
+VmDirRESTGetStrArrayParam(
+    PVDIR_REST_OPERATION    pRestOp,
+    PSTR                    pszKey,
+    PVMDIR_STRING_LIST*     ppValList,
+    BOOLEAN                 bRequired
+    );
+
+DWORD
+VmDirRESTGetLdapSearchParams(
+    PVDIR_REST_OPERATION    pRestOp,
+    PSTR*                   ppszDN,
+    int*                    piScope,
+    PVDIR_FILTER*           ppFilter,
+    PVDIR_BERVALUE*         ppbvAttrs,
+    PVDIR_LDAP_CONTROL*     ppPagedResultsCtrl
     );
 
 // result.c

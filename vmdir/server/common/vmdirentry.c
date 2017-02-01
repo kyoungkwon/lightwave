@@ -824,7 +824,7 @@ VmDirFreeAttribute(
  */
 DWORD
 VmDirStringToBervalContent(
-    PSTR               pszBerval,
+    PCSTR              pszBerval,
     PVDIR_BERVALUE     pDupBerval
     )
 {
