@@ -14,10 +14,10 @@
 
 typedef struct _VDIR_REST_RESULT
 {
-    PSTR        pszErrorCode;
-    PSTR        pszErrorMessage;
+    DWORD       dwErrCode;
+    PSTR        pszErrMsg;
     PSTR        pszOutputJson;
-    PLW_HASHMAP pAdditionalInfo;
+    PLW_HASHMAP pAddlInfo;
 
 } VDIR_REST_RESULT, *PVDIR_REST_RESULT;
 

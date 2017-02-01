@@ -15,7 +15,7 @@
 #include "includes.h"
 
 DWORD
-VmDirParseJSONToEntry(
+VmDirRESTParseJsonToEntry(
     const char*     pszInputJson,
     PVDIR_ENTRY*    ppEntry
     )
@@ -146,7 +146,7 @@ error:
 }
 
 DWORD
-VmDirParseJSONToMods(
+VmDirRESTParseJsonToMods(
     const char*         pszInputJson,
     PVDIR_MODIFICATION* ppMods,
     DWORD*              pdwNumMods

@@ -18,26 +18,26 @@ DWORD
 VmDirRESTGetStrParam(
     PVDIR_REST_OPERATION    pRestOp,
     PSTR                    pszKey,
-    PSTR*                   ppszValue,
+    PSTR*                   ppszVal,
     BOOLEAN                 bRequired
     )
 {
     DWORD   dwError = 0;
-    PSTR    pszValue = NULL;
+    PSTR    pszVal = NULL;
 
-    if (!pRestOp || IsNullOrEmptyString(pszKey) || !ppszValue)
+    if (!pRestOp || IsNullOrEmptyString(pszKey) || !ppszVal)
     {
         dwError = VMDIR_ERROR_INVALID_PARAMETER;
         BAIL_ON_VMDIR_ERROR(dwError);
     }
 
-    if (LwRtlHashMapFindKey(pRestOp->pParamMap, (PVOID*)&pszValue, pszKey))
+    if (LwRtlHashMapFindKey(pRestOp->pParamMap, (PVOID*)&pszVal, pszKey))
     {
         dwError = bRequired ? VMDIR_ERROR_INVALID_REQUEST : 0;
         BAIL_ON_VMDIR_ERROR(dwError);
     }
 
-    dwError = VmDirAllocateStringA(pszValue, ppszValue);
+    dwError = VmDirAllocateStringA(pszVal, ppszVal);
     BAIL_ON_VMDIR_ERROR(dwError);
 
 cleanup:
@@ -55,26 +55,26 @@ DWORD
 VmDirRESTGetIntParam(
     PVDIR_REST_OPERATION    pRestOp,
     PSTR                    pszKey,
-    int*                    piValue,
+    int*                    piVal,
     BOOLEAN                 bRequired
     )
 {
     DWORD   dwError = 0;
-    PSTR    pszValue = NULL;
+    PSTR    pszVal = NULL;
 
-    if (!pRestOp || IsNullOrEmptyString(pszKey) || !piValue)
+    if (!pRestOp || IsNullOrEmptyString(pszKey) || !piVal)
     {
         dwError = VMDIR_ERROR_INVALID_PARAMETER;
         BAIL_ON_VMDIR_ERROR(dwError);
     }
 
-    if (LwRtlHashMapFindKey(pRestOp->pParamMap, (PVOID*)&pszValue, pszKey))
+    if (LwRtlHashMapFindKey(pRestOp->pParamMap, (PVOID*)&pszVal, pszKey))
     {
         dwError = bRequired ? VMDIR_ERROR_INVALID_REQUEST : 0;
         BAIL_ON_VMDIR_ERROR(dwError);
     }
 
-    *piValue = VmDirStringToIA(pszValue);
+    *piVal = VmDirStringToIA(pszVal);
 
 cleanup:
     return dwError;
@@ -88,7 +88,7 @@ error:
 }
 
 DWORD
-VmDirRESTGetStrArrayParam(
+VmDirRESTGetStrListParam(
     PVDIR_REST_OPERATION    pRestOp,
     PSTR                    pszKey,
     PVMDIR_STRING_LIST*     ppValList,
@@ -96,7 +96,7 @@ VmDirRESTGetStrArrayParam(
     )
 {
     DWORD   dwError = 0;
-    PSTR    pszValue = NULL;
+    PSTR    pszVal = NULL;
 
     if (!pRestOp || IsNullOrEmptyString(pszKey) || !ppValList)
     {
@@ -104,13 +104,13 @@ VmDirRESTGetStrArrayParam(
         BAIL_ON_VMDIR_ERROR(dwError);
     }
 
-    if (LwRtlHashMapFindKey(pRestOp->pParamMap, (PVOID*)&pszValue, pszKey))
+    if (LwRtlHashMapFindKey(pRestOp->pParamMap, (PVOID*)&pszVal, pszKey))
     {
         dwError = bRequired ? VMDIR_ERROR_INVALID_REQUEST : 0;
         BAIL_ON_VMDIR_ERROR(dwError);
     }
 
-    dwError = VmDirStringToTokenList(pszValue, ",", ppValList);
+    dwError = VmDirStringToTokenList(pszVal, ",", ppValList);
     BAIL_ON_VMDIR_ERROR(dwError);
 
 cleanup:
@@ -162,7 +162,7 @@ VmDirRESTGetLdapSearchParams(
     dwError = VmDirRESTGetStrParam(pRestOp, "filter", &pszFilter, FALSE);
     BAIL_ON_VMDIR_ERROR(dwError);
 
-    dwError = VmDirRESTGetStrArrayParam(pRestOp, "attrs", &pAttrs, FALSE);
+    dwError = VmDirRESTGetStrListParam(pRestOp, "attrs", &pAttrs, FALSE);
     BAIL_ON_VMDIR_ERROR(dwError);
 
     dwError = VmDirRESTGetIntParam(pRestOp, "page_size", &iPageSize, FALSE);

@@ -49,6 +49,7 @@ VmDirRESTAuth(
     BAIL_ON_VMDIR_ERROR(dwError);
 
 cleanup:
+    VMDIR_SET_REST_RESULT(pRestOp, pBindOp, dwError);
     VmDirFreeOperation(pBindOp);
     return dwError;
 

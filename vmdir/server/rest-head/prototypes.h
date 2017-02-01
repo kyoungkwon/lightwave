@@ -34,13 +34,13 @@ VmDirRESTAuthToken(
 
 // jsonparse.c
 DWORD
-VmDirParseJSONToEntry(
+VmDirRESTParseJsonToEntry(
     const char*     pszInputJson,
     PVDIR_ENTRY*    ppEntry
     );
 
 DWORD
-VmDirParseJSONToMods(
+VmDirRESTParseJsonToMods(
     const char*         pszInputJson,
     PVDIR_MODIFICATION* ppMods,
     DWORD*              pdwNumMods
@@ -113,7 +113,7 @@ DWORD
 VmDirRESTGetStrParam(
     PVDIR_REST_OPERATION    pRestOp,
     PSTR                    pszKey,
-    PSTR*                   ppszValue,
+    PSTR*                   ppszVal,
     BOOLEAN                 bRequired
     );
 
@@ -121,12 +121,12 @@ DWORD
 VmDirRESTGetIntParam(
     PVDIR_REST_OPERATION    pRestOp,
     PSTR                    pszKey,
-    int*                    piValue,
+    int*                    piVal,
     BOOLEAN                 bRequired
     );
 
 DWORD
-VmDirRESTGetStrArrayParam(
+VmDirRESTGetStrListParam(
     PVDIR_REST_OPERATION    pRestOp,
     PSTR                    pszKey,
     PVMDIR_STRING_LIST*     ppValList,
@@ -146,10 +146,30 @@ VmDirRESTGetLdapSearchParams(
 // result.c
 DWORD
 VmDirRESTResultInit(
-    PVDIR_REST_RESULT*  ppRestResult
+    PVDIR_REST_RESULT*  ppRestRslt
+    );
+
+DWORD
+VmDirRESTResultSetError(
+    PVDIR_REST_RESULT   pRestRslt,
+    DWORD               dwErrCode,
+    PSTR                pszErrMsg
+    );
+
+DWORD
+VmDirRESTResultSetAddlInfo(
+    PVDIR_REST_RESULT   pRestRslt,
+    PSTR                pszKey,
+    PSTR                pszVal
+    );
+
+DWORD
+VmDirRESTResultToResponseBody(
+    PVDIR_REST_RESULT   pRestRslt,
+    PSTR*               ppszBody
     );
 
 VOID
 VmDirFreeRESTResult(
-    PVDIR_REST_RESULT   pRestResult
+    PVDIR_REST_RESULT   pRestRslt
     );
