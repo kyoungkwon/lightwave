@@ -95,14 +95,6 @@ VmDirRESTLdapSearch(
 {
     DWORD   dwError = 0;
     PSTR    pszDN = NULL;
-    PSTR    pszScope = NULL;
-    PSTR    pszFilter = NULL;
-    PSTR    pszAttrs = NULL;
-    PSTR    pszPageSize = NULL;
-    PSTR    pszPageResultsCookie = NULL;
-    int                 scope = LDAP_SCOPE_BASE;
-    PVDIR_FILTER        pFilter = NULL;
-    PVDIR_BERVALUE      pbvAttrs = NULL;    // TODO maybe should be a map
     PVDIR_LDAP_CONTROL  pPagedResultsCtrl = NULL;
     PVDIR_REST_OPERATION    pRestOp = NULL;
     PVDIR_OPERATION         pSearchOp = NULL;
@@ -119,120 +111,35 @@ VmDirRESTLdapSearch(
             NULL, -1, LDAP_REQ_SEARCH, pRestOp->pConn, &pSearchOp);
     BAIL_ON_VMDIR_ERROR(dwError);
 
-    // get dn
-    dwError = VmDirRESTGetParam(pRestOp, "dn", &pszDN, TRUE);
+    dwError = VmDirRESTGetLdapSearchParams(
+            pRestOp,
+            &pszDN,
+            &pSearchOp->request.searchReq.scope,
+            &pSearchOp->request.searchReq.filter,
+            &pSearchOp->request.searchReq.attrs,
+            &pPagedResultsCtrl);
     BAIL_ON_VMDIR_ERROR(dwError);
 
     dwError = VmDirStringToBervalContent(pszDN, &pSearchOp->reqDn);
     BAIL_ON_VMDIR_ERROR(dwError);
 
-    // get scope
-    dwError = VmDirRESTGetParam(pRestOp, "scope", &pszScope, FALSE);
-    BAIL_ON_VMDIR_ERROR(dwError);
-
-    if (!IsNullOrEmptyString(pszScope))
-    {
-        if (VmDirStringCompareA("base", pszScope, FALSE) == 0)
-        {
-            scope = LDAP_SCOPE_BASE;
-        }
-        else if (VmDirStringCompareA("one", pszScope, FALSE) == 0 ||
-                 VmDirStringCompareA("onelevel", pszScope, FALSE) == 0)
-        {
-            scope = LDAP_SCOPE_ONELEVEL;
-        }
-        else if (VmDirStringCompareA("sub", pszScope, FALSE) == 0 ||
-                 VmDirStringCompareA("subtree", pszScope, FALSE) == 0)
-        {
-            scope = LDAP_SCOPE_SUBTREE;
-        }
-        else
-        {
-            dwError = VMDIR_ERROR_INVALID_REQUEST;
-            BAIL_ON_VMDIR_ERROR(dwError);
-        }
-    }
-    pSearchOp->request.searchReq.scope = scope;
-
-    // get filter
-    dwError = VmDirRESTGetParam(pRestOp, "filter", &pszFilter, FALSE);
-    BAIL_ON_VMDIR_ERROR(dwError);
-
-    if (IsNullOrEmptyString(pszFilter))
-    {
-        dwError = VmDirAllocateStringA("(objectclass=*)", &pszFilter);
-        BAIL_ON_VMDIR_REST_ERROR(dwError, NULL, pHttp);
-    }
-
-    dwError = StrFilterToFilter(pszFilter, &pFilter);
-    BAIL_ON_VMDIR_ERROR(dwError);
-
-    pSearchOp->request.searchReq.filter = pFilter;
-    pFilter = NULL;
-
-    // get attributes
-    dwError = VmDirRESTGetParam(pRestOp, "attrs", &pszAttrs, FALSE);
-    BAIL_ON_VMDIR_ERROR(dwError);
-
-    if (!IsNullOrEmptyString(pszAttrs))
-    {
-
-    }
-
-    // get paged results control
-    dwError = VmDirRESTGetParam(pRestOp, "page_size", &pszPageSize, FALSE);
-    BAIL_ON_VMDIR_ERROR(dwError);
-
-    dwError = VmDirRESTGetParam(
-            pRestOp, "page_results_cookie", &pszPageResultsCookie, FALSE);
-    BAIL_ON_VMDIR_ERROR(dwError);
-
-    if (!IsNullOrEmptyString(pszPageSize))
-    {
-        dwError = VmDirAllocateMemory(
-                sizeof(VDIR_LDAP_CONTROL), (PVOID*)&pPagedResultsCtrl);
-        BAIL_ON_VMDIR_ERROR(dwError);
-
-        pPagedResultsCtrl->value.pagedResultCtrlVal.pageSize =
-                (DWORD)VmDirStringToIA(pszPageSize);
-
-        pPagedResultsCtrl->value.pagedResultCtrlVal.cookie[0] = '\0';
-        if (!IsNullOrEmptyString(pszPageResultsCookie))
-        {
-            dwError = VmDirStringNCpyA(
-                    pPagedResultsCtrl->value.pagedResultCtrlVal.cookie,
-                    VMDIR_PS_COOKIE_LEN,
-                    pszPageResultsCookie,
-                    VMDIR_PS_COOKIE_LEN - 1);
-            BAIL_ON_VMDIR_ERROR(dwError);
-        }
-    }
-
     pSearchOp->showPagedResultsCtrl = pPagedResultsCtrl;
 
-    // run search
     dwError = VmDirMLSearch(pSearchOp);
     BAIL_ON_VMDIR_ERROR(dwError);
 
     // TODO create result
+
+    // additional info - result count
+    // additional info - result
 
     if (pPagedResultsCtrl)
     {
         // additional info - new cookie (maybe always?)
     }
 
-    // additional info - result count
-    // additional info - result
-
 cleanup:
     VMDIR_SAFE_FREE_MEMORY(pszDN);
-    VMDIR_SAFE_FREE_MEMORY(pszScope);
-    VMDIR_SAFE_FREE_MEMORY(pszFilter);
-    VMDIR_SAFE_FREE_MEMORY(pszAttrs);
-    VMDIR_SAFE_FREE_MEMORY(pszPageSize);
-    VMDIR_SAFE_FREE_MEMORY(pszPageResultsCookie);
-    DeleteFilter(pFilter);
-
     VMDIR_SAFE_FREE_MEMORY(pPagedResultsCtrl);
     VmDirFreeOperation(pSearchOp);
     return dwError;
@@ -269,7 +176,7 @@ VmDirRESTLdapModify(
             NULL, -1, LDAP_REQ_MODIFY, pRestOp->pConn, &pModifyOp);
     BAIL_ON_VMDIR_ERROR(dwError);
 
-    dwError = VmDirRESTGetParam(pRestOp, "dn", &pszDN, TRUE);
+    dwError = VmDirRESTGetStrParam(pRestOp, "dn", &pszDN, TRUE);
     BAIL_ON_VMDIR_ERROR(dwError);
 
     dwError = VmDirStringToBervalContent(pszDN, &pModifyOp->reqDn);
@@ -326,7 +233,7 @@ VmDirRESTLdapDelete(
             NULL, -1, LDAP_REQ_DELETE, pRestOp->pConn, &pDeleteOp);
     BAIL_ON_VMDIR_ERROR(dwError);
 
-    dwError = VmDirRESTGetParam(pRestOp, "dn", &pszDN, TRUE);
+    dwError = VmDirRESTGetStrParam(pRestOp, "dn", &pszDN, TRUE);
     BAIL_ON_VMDIR_ERROR(dwError);
 
     dwError = VmDirStringToBervalContent(pszDN, &pDeleteOp->reqDn);

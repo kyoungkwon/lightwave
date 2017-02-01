@@ -9,7 +9,7 @@ librest_head_la_SOURCES = \
     ldapapi.c \
     libmain.c \
     operation.c \
-    params.c \
+    param.c \
     result.c
 
 librest_head_la_CPPFLAGS = \
