@@ -134,9 +134,13 @@ VmDirToLDAPError(
                 dwError = LDAP_SASL_BIND_IN_PROGRESS;
                 break;
 
+            case VMDIR_ERROR_INVALID_REQUEST:
+                dwError = LDAP_PROTOCOL_ERROR;
+                break;
+
             default:
-            dwError = LDAP_OPERATIONS_ERROR;
-            break;
+                dwError = LDAP_OPERATIONS_ERROR;
+                break;
         }
     }
     else if ( NOT_LDAP_ERROR_SPACE( dwVmDirError ) )

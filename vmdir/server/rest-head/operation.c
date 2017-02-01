@@ -145,9 +145,9 @@ VmDirRESTOperationWriteResponse(
 {
     DWORD   dwError = 0;
     DWORD   done = 0;
-    PSTR    pszData = NULL;
-    PSTR    pszDataLen = NULL;
-    size_t  dataLen = 0;
+    PSTR    pszBody = NULL;
+    PSTR    pszBodyLen = NULL;
+    size_t  bodyLen = 0;
     size_t  sentLen = 0;
 
     if (!pRestOp || !ppResponse)
@@ -171,34 +171,35 @@ VmDirRESTOperationWriteResponse(
     dwError = VmRESTSetHttpHeader(ppResponse, "Content-Type", "application/json");
     BAIL_ON_VMDIR_ERROR(dwError);
 
-//    TODO use pRestOp->pResult
-
-    dataLen = VmDirStringLenA(pszData);
-
-    dwError = VmDirAllocateStringPrintf(&pszDataLen, "%ld", dataLen);
+    dwError = VmDirRESTResultToResponseBody(pRestOp->pResult, &pszBody);
     BAIL_ON_VMDIR_ERROR(dwError);
 
-    dwError = VmRESTSetDataLength(ppResponse, pszDataLen);
+    bodyLen = VmDirStringLenA(pszBody);
+
+    dwError = VmDirAllocateStringPrintf(&pszBodyLen, "%ld", bodyLen);
+    BAIL_ON_VMDIR_ERROR(dwError);
+
+    dwError = VmRESTSetDataLength(ppResponse, pszBodyLen);
     BAIL_ON_VMDIR_ERROR(dwError);
 
     while (!done)
     {
-        size_t chunkLen = dataLen > MAX_REST_PAYLOAD_LENGTH ?
-                MAX_REST_PAYLOAD_LENGTH : dataLen;
+        size_t chunkLen = bodyLen > MAX_REST_PAYLOAD_LENGTH ?
+                MAX_REST_PAYLOAD_LENGTH : bodyLen;
 
-        dwError = VmRESTSetHttpPayload(ppResponse, pszData + sentLen, chunkLen, &done);
+        dwError = VmRESTSetHttpPayload(ppResponse, pszBody + sentLen, chunkLen, &done);
         BAIL_ON_VMDIR_ERROR(dwError);
 
         sentLen += chunkLen;
-        dataLen -= chunkLen;
+        bodyLen -= chunkLen;
     }
 
     dwError = VmRESTSetHttpPayload(ppResponse, "", 0, &done);
     BAIL_ON_VMDIR_ERROR(dwError);
 
 cleanup:
-    VMDIR_SAFE_FREE_STRINGA(pszData);
-    VMDIR_SAFE_FREE_STRINGA(pszDataLen);
+    VMDIR_SAFE_FREE_STRINGA(pszBody);
+    VMDIR_SAFE_FREE_STRINGA(pszBodyLen);
     return dwError;
 
 error:

@@ -60,7 +60,7 @@ VmDirRESTLdapAdd(
             NULL, -1, LDAP_REQ_ADD, pRestOp->pConn, &pAddOp);
     BAIL_ON_VMDIR_ERROR(dwError);
 
-    dwError = VmDirParseJSONToEntry(pRestOp->pszInputJson, &pEntry);
+    dwError = VmDirRESTParseJsonToEntry(pRestOp->pszInputJson, &pEntry);
     BAIL_ON_VMDIR_ERROR(dwError);
 
     dwError = VmDirResetAddRequestEntry(pAddOp, pEntry);
@@ -70,9 +70,8 @@ VmDirRESTLdapAdd(
     dwError = VmDirMLAdd(pAddOp);
     BAIL_ON_VMDIR_ERROR(dwError);
 
-    // TODO create result
-
 cleanup:
+    VMDIR_SET_REST_RESULT(pRestOp, pAddOp, dwError);
     VmDirFreeOperation(pAddOp);
     VmDirFreeEntry(pEntry);
     return dwError;
@@ -139,6 +138,7 @@ VmDirRESTLdapSearch(
     }
 
 cleanup:
+    VMDIR_SET_REST_RESULT(pRestOp, pSearchOp, dwError);
     VMDIR_SAFE_FREE_MEMORY(pszDN);
     VMDIR_SAFE_FREE_MEMORY(pPagedResultsCtrl);
     VmDirFreeOperation(pSearchOp);
@@ -185,7 +185,7 @@ VmDirRESTLdapModify(
     dwError = VmDirStringToBervalContent(pszDN, &pModifyOp->request.modifyReq.dn);
     BAIL_ON_VMDIR_ERROR(dwError);
 
-    dwError = VmDirParseJSONToMods(
+    dwError = VmDirRESTParseJsonToMods(
             pRestOp->pszInputJson,
             &pModifyOp->request.modifyReq.mods,
             &pModifyOp->request.modifyReq.numMods);
@@ -194,9 +194,8 @@ VmDirRESTLdapModify(
     dwError = VmDirMLModify(pModifyOp);
     BAIL_ON_VMDIR_ERROR(dwError);
 
-    // TODO create result
-
 cleanup:
+    VMDIR_SET_REST_RESULT(pRestOp, pModifyOp, dwError);
     VMDIR_SAFE_FREE_MEMORY(pszDN);
     VmDirFreeOperation(pModifyOp);
     return dwError;
@@ -245,9 +244,8 @@ VmDirRESTLdapDelete(
     dwError = VmDirMLDelete(pDeleteOp);
     BAIL_ON_VMDIR_ERROR(dwError);
 
-    // TODO create result
-
 cleanup:
+    VMDIR_SET_REST_RESULT(pRestOp, pDeleteOp, dwError);
     VMDIR_SAFE_FREE_MEMORY(pszDN);
     VmDirFreeOperation(pDeleteOp);
     return dwError;
