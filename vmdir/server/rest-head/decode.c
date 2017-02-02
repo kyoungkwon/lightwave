@@ -15,14 +15,13 @@
 #include "includes.h"
 
 DWORD
-VmDirRESTParseJsonToEntry(
-    const char*     pszInputJson,
+VmDirRESTDecodeEntry(
+    json_t*         pjInput,
     PVDIR_ENTRY*    ppEntry
     )
 {
     DWORD   dwError = 0;
     DWORD   i = 0, j = 0;
-    json_error_t    jError = {0};
     json_t* pjEntry = NULL;
     json_t* pjDN = NULL;
     json_t* pjAttrs = NULL;
@@ -36,9 +35,16 @@ VmDirRESTParseJsonToEntry(
     PVDIR_ENTRY     pEntry = NULL;
     PVDIR_ATTRIBUTE pAttr = NULL;
 
-    if (!pszInputJson || !ppEntry)
+    if (!pjInput || !ppEntry)
     {
         dwError = VMDIR_ERROR_INVALID_PARAMETER;
+        BAIL_ON_VMDIR_ERROR(dwError);
+    }
+
+    pjEntry = pjInput;
+    if (!json_is_object(pjEntry))
+    {
+        dwError = VMDIR_ERROR_INVALID_REQUEST;
         BAIL_ON_VMDIR_ERROR(dwError);
     }
 
@@ -46,13 +52,6 @@ VmDirRESTParseJsonToEntry(
     BAIL_ON_VMDIR_ERROR(dwError);
 
     pEntry->allocType = ENTRY_STORAGE_FORMAT_NORMAL;
-
-    pjEntry = json_loads(pszInputJson, 0, &jError);
-    if (!pjEntry || !json_is_object(pjEntry))
-    {
-        dwError = VMDIR_ERROR_INVALID_REQUEST;
-        BAIL_ON_VMDIR_ERROR(dwError);
-    }
 
     pjDN = json_object_get(pjEntry, "dn");
     if (!pjDN || !json_is_string(pjDN))
@@ -130,10 +129,6 @@ VmDirRESTParseJsonToEntry(
     *ppEntry = pEntry;
 
 cleanup:
-    if (pjEntry)
-    {
-        json_decref(pjEntry);
-    }
     return dwError;
 
 error:
@@ -146,8 +141,8 @@ error:
 }
 
 DWORD
-VmDirRESTParseJsonToMods(
-    const char*         pszInputJson,
+VmDirRESTDecodeMods(
+    json_t*             pjInput,
     PVDIR_MODIFICATION* ppMods,
     DWORD*              pdwNumMods
     )
@@ -155,7 +150,6 @@ VmDirRESTParseJsonToMods(
     DWORD   dwError = 0;
     DWORD   dwNumMods = 0;
     DWORD   i = 0, j = 0;
-    json_error_t    jError = {0};
     json_t* pjMods = NULL;
     json_t* pjMod = NULL;
     json_t* pjOp = NULL;
@@ -169,14 +163,14 @@ VmDirRESTParseJsonToMods(
     PVDIR_MODIFICATION  pMod = NULL;
     PVDIR_MODIFICATION  pMods = NULL;
 
-    if (!pszInputJson || !ppMods || !pdwNumMods)
+    if (!pjInput || !ppMods || !pdwNumMods)
     {
         dwError = VMDIR_ERROR_INVALID_PARAMETER;
         BAIL_ON_VMDIR_ERROR(dwError);
     }
 
-    pjMods = json_loads(pszInputJson, 0, &jError);
-    if (!pjMods || !json_is_array(pjMods))
+    pjMods = pjInput;
+    if (!json_is_array(pjMods))
     {
         dwError = VMDIR_ERROR_INVALID_REQUEST;
         BAIL_ON_VMDIR_ERROR(dwError);
@@ -275,10 +269,6 @@ VmDirRESTParseJsonToMods(
     *pdwNumMods = dwNumMods;
 
 cleanup:
-    if (pjMods)
-    {
-        json_decref(pjMods);
-    }
     return dwError;
 
 error:

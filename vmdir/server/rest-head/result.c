@@ -39,6 +39,8 @@ VmDirRESTResultInit(
             NULL);
     BAIL_ON_VMDIR_ERROR(dwError);
 
+    pRestRslt->bErrSet = FALSE;
+
     *ppRestRslt = pRestRslt;
 
 cleanup:
@@ -67,13 +69,17 @@ VmDirRESTResultSetError(
         BAIL_ON_VMDIR_ERROR(dwError);
     }
 
-    pRestRslt->dwErrCode = dwErrCode;
-
-    if (IsNullOrEmptyString(pRestRslt->pszErrMsg) &&
-        !IsNullOrEmptyString(pszErrMsg))
+    if (!pRestRslt->bErrSet)
     {
-        dwError = VmDirAllocateStringA(pszErrMsg, &pRestRslt->pszErrMsg);
-        BAIL_ON_VMDIR_ERROR(dwError);
+        if (!IsNullOrEmptyString(pszErrMsg))
+        {
+            VMDIR_SAFE_FREE_MEMORY(pRestRslt->pszErrMsg);
+            dwError = VmDirAllocateStringA(pszErrMsg, &pRestRslt->pszErrMsg);
+            BAIL_ON_VMDIR_ERROR(dwError);
+        }
+
+        pRestRslt->dwErrCode = dwErrCode;
+        pRestRslt->bErrSet = TRUE;
     }
 
 cleanup:
@@ -135,7 +141,6 @@ VmDirRESTResultToResponseBody(
     json_t* pjErrCode = NULL;
     json_t* pjErrMsg = NULL;
     json_t* pjAddl = NULL;
-    json_t* pjRslt = NULL;
     LW_HASHMAP_ITER iter = LW_HASHMAP_ITER_INIT;
     LW_HASHMAP_PAIR pair = {NULL, NULL};
     PSTR    pszBody = NULL;
@@ -163,10 +168,9 @@ VmDirRESTResultToResponseBody(
         BAIL_ON_VMDIR_ERROR(dwError);
     }
 
-    if (!IsNullOrEmptyString(pRestRslt->pszOutputJson))
+    if (pRestRslt->pjOutput)
     {
-        pjRslt = json_string(pRestRslt->pszOutputJson);
-        dwError = json_object_set_new(pjBody, "result", pjRslt);
+        dwError = json_object_set(pjBody, "result", pRestRslt->pjOutput);
         BAIL_ON_VMDIR_ERROR(dwError);
     }
 
@@ -202,7 +206,10 @@ VmDirFreeRESTResult(
 	if (pRestRslt)
 	{
         VMDIR_SAFE_FREE_MEMORY(pRestRslt->pszErrMsg);
-        VMDIR_SAFE_FREE_MEMORY(pRestRslt->pszOutputJson);
+        if (pRestRslt->pjOutput)
+        {
+            json_decref(pRestRslt->pjOutput);
+        }
         LwRtlHashMapClear(pRestRslt->pAddlInfo, VmDirSimpleHashMapPairFree, NULL);
         LwRtlFreeHashMap(&pRestRslt->pAddlInfo);
 	}

@@ -152,18 +152,6 @@
         }
     },
     "definitions": {
-        "GenericResponse": {
-            "type": "object",
-            "properties": {
-                "error_code": {
-                    "type": "integer",
-                    "format": "int32"
-                },
-                "error_message": {
-                    "type": "string"
-                }
-            }
-        },
         "LDAPEntry": {
             "type": "object",
             "properties": {
@@ -203,11 +191,27 @@
                 }
             }
         },
+        "GenericResponse": {
+            "type": "object",
+            "properties": {
+                "error_code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "error_message": {
+                    "type": "string"
+                }
+            }
+        },
         "LDAPSearchResponse": {
             "type": "object",
             "properties": {
-                "generic_response": {
-                    "$ref": "#/definitions/GenericResponse"
+                "error_code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "error_message": {
+                    "type": "string"
                 },
                 "paged_results_cookie": {
                     "type": "string"

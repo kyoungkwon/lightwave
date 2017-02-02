@@ -314,6 +314,10 @@ VmDirSendSearchEntry(
     {
         ; // no op in INTERNAL case
     }
+    else if ( sr->bStoreRsltInMem )
+    {
+        ; // don't send the entry and store it in memory
+    }
     else
     {
         // If not replication, and showDeletedObjectsCtrl not present, => don't send back Deleted objects (tombstones).

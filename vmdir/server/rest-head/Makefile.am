@@ -3,9 +3,9 @@ noinst_LTLIBRARIES = librest-head.la
 
 librest_head_la_SOURCES = \
     auth.c \
+    decode.c \
+    encode.c \
     globals.c \
-    jsonbuild.c \
-    jsonparse.c \
     ldapapi.c \
     libmain.c \
     operation.c \
