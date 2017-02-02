@@ -16,8 +16,9 @@ typedef struct _VDIR_REST_RESULT
 {
     DWORD       dwErrCode;
     PSTR        pszErrMsg;
-    PSTR        pszOutputJson;
+    json_t*     pjOutput;
     PLW_HASHMAP pAddlInfo;
+    BOOLEAN     bErrSet;
 
 } VDIR_REST_RESULT, *PVDIR_REST_RESULT;
 
@@ -25,8 +26,8 @@ typedef struct _VDIR_REST_OPERATION
 {
     PSTR                pszMethod;
     PSTR                pszEndpoint;
-    PSTR                pszInputJson;
     PSTR				pszAuth;
+    json_t*             pjInput;
     PLW_HASHMAP         pParamMap;
     PVDIR_CONNECTION	pConn;
     PVDIR_REST_RESULT   pResult;

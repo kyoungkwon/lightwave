@@ -60,7 +60,7 @@ VmDirRESTLdapAdd(
             NULL, -1, LDAP_REQ_ADD, pRestOp->pConn, &pAddOp);
     BAIL_ON_VMDIR_ERROR(dwError);
 
-    dwError = VmDirRESTParseJsonToEntry(pRestOp->pszInputJson, &pEntry);
+    dwError = VmDirRESTDecodeEntry(pRestOp->pjInput, &pEntry);
     BAIL_ON_VMDIR_ERROR(dwError);
 
     dwError = VmDirResetAddRequestEntry(pAddOp, pEntry);
@@ -94,6 +94,7 @@ VmDirRESTLdapSearch(
 {
     DWORD   dwError = 0;
     PSTR    pszDN = NULL;
+    PSTR    pszResultCount = NULL;
     PVDIR_LDAP_CONTROL  pPagedResultsCtrl = NULL;
     PVDIR_REST_OPERATION    pRestOp = NULL;
     PVDIR_OPERATION         pSearchOp = NULL;
@@ -123,23 +124,39 @@ VmDirRESTLdapSearch(
     BAIL_ON_VMDIR_ERROR(dwError);
 
     pSearchOp->showPagedResultsCtrl = pPagedResultsCtrl;
+    pSearchOp->request.searchReq.bStoreRsltInMem = TRUE;
 
     dwError = VmDirMLSearch(pSearchOp);
     BAIL_ON_VMDIR_ERROR(dwError);
 
-    // TODO create result
+    dwError = VmDirRESTEncodeEntryArray(
+            &pSearchOp->internalSearchEntryArray,
+            pSearchOp->request.searchReq.attrs,
+            &pRestOp->pResult->pjOutput);
+    BAIL_ON_VMDIR_ERROR(dwError);
 
-    // additional info - result count
-    // additional info - result
-
+    // set additional info
     if (pPagedResultsCtrl)
     {
-        // additional info - new cookie (maybe always?)
+        dwError = VmDirRESTResultSetAddlInfo(
+                pRestOp->pResult,
+                "paged_results_cookie",
+                pPagedResultsCtrl->value.pagedResultCtrlVal.cookie);
+        BAIL_ON_VMDIR_ERROR(dwError);
     }
+
+    dwError = VmDirAllocateStringPrintf(
+            &pszResultCount, "%ld", pSearchOp->internalSearchEntryArray.iSize);
+    BAIL_ON_VMDIR_ERROR(dwError);
+
+    dwError = VmDirRESTResultSetAddlInfo(
+            pRestOp->pResult, "result_count", pszResultCount);
+    BAIL_ON_VMDIR_ERROR(dwError);
 
 cleanup:
     VMDIR_SET_REST_RESULT(pRestOp, pSearchOp, dwError);
     VMDIR_SAFE_FREE_MEMORY(pszDN);
+    VMDIR_SAFE_FREE_MEMORY(pszResultCount);
     VMDIR_SAFE_FREE_MEMORY(pPagedResultsCtrl);
     VmDirFreeOperation(pSearchOp);
     return dwError;
@@ -185,8 +202,8 @@ VmDirRESTLdapModify(
     dwError = VmDirStringToBervalContent(pszDN, &pModifyOp->request.modifyReq.dn);
     BAIL_ON_VMDIR_ERROR(dwError);
 
-    dwError = VmDirRESTParseJsonToMods(
-            pRestOp->pszInputJson,
+    dwError = VmDirRESTDecodeMods(
+            pRestOp->pjInput,
             &pModifyOp->request.modifyReq.mods,
             &pModifyOp->request.modifyReq.numMods);
     BAIL_ON_VMDIR_ERROR(dwError);

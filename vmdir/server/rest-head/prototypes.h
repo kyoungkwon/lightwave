@@ -30,20 +30,39 @@ VmDirRESTAuthToken(
     PVDIR_OPERATION         pBindOp
     );
 
-// jsonbuild.c
-
-// jsonparse.c
+// decode.c
 DWORD
-VmDirRESTParseJsonToEntry(
-    const char*     pszInputJson,
+VmDirRESTDecodeEntry(
+    json_t*         pjInput,
     PVDIR_ENTRY*    ppEntry
     );
 
 DWORD
-VmDirRESTParseJsonToMods(
-    const char*         pszInputJson,
+VmDirRESTDecodeMods(
+    json_t*             pjInput,
     PVDIR_MODIFICATION* ppMods,
     DWORD*              pdwNumMods
+    );
+
+// encode.c
+DWORD
+VmDirRESTEncodeAttribute(
+    PVDIR_ATTRIBUTE pAttr,
+    json_t**        ppjOutput
+    );
+
+DWORD
+VmDirRESTEncodeEntry(
+    PVDIR_ENTRY     pEntry,
+    PVDIR_BERVALUE  pbvAttrs,
+    json_t**        ppjOutput
+    );
+
+DWORD
+VmDirRESTEncodeEntryArray(
+    PVDIR_ENTRY_ARRAY   pEntryArray,
+    PVDIR_BERVALUE      pbvAttrs,
+    json_t**            ppjOutput
     );
 
 // ldapapi.c

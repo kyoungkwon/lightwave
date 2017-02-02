@@ -124,6 +124,8 @@ VmDirRESTRequestHandler(
     BAIL_ON_VMDIR_ERROR(dwError);
 
 response:
+    // TODO what about http return code and msg?
+    VMDIR_SET_REST_RESULT(pRestOp, NULL, dwError);
     // Nothing can be done if failed to send response
     dwError = VmDirRESTOperationWriteResponse(pRestOp, ppResponse);
     goto cleanup;

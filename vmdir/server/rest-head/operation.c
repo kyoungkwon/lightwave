@@ -68,9 +68,11 @@ VmDirRESTOperationReadRequest(
 {
     DWORD   dwError = 0;
     DWORD   i = 0, done = 0;
-    PSTR    pszTmp = NULL;
+    json_error_t    jError = {0};
+    PSTR    pszURI = NULL;
     PSTR    pszKey = NULL;
     PSTR    pszVal = NULL;
+    PSTR    pszInput = NULL;
     size_t  len = 0;
 
     if (!pRestOp || !pRestReq)
@@ -84,14 +86,11 @@ VmDirRESTOperationReadRequest(
     BAIL_ON_VMDIR_ERROR(dwError);
 
     // read request URI
-    dwError = VmRESTGetHttpURI(pRestReq, &pRestOp->pszEndpoint);
+    dwError = VmRESTGetHttpURI(pRestReq, &pszURI);
     BAIL_ON_VMDIR_ERROR(dwError);
 
-    pszTmp = VmDirStringChrA(pRestOp->pszEndpoint, '?');
-    if (pszTmp)
-    {
-        *pszTmp = '\0';
-    }
+    dwError = VmRestGetEndPointURIfromRequestURI(pszURI, &pRestOp->pszEndpoint);
+    BAIL_ON_VMDIR_ERROR(dwError);
 
     // read request authorization info
     dwError = VmRESTGetHttpHeader(pRestReq, "Authorization", &pRestOp->pszAuth);
@@ -114,18 +113,27 @@ VmDirRESTOperationReadRequest(
     while (!done)
     {
         dwError = VmDirReallocateMemory(
-                (PVOID)pRestOp->pszInputJson,
-                (PVOID*)&pRestOp->pszInputJson,
+                (PVOID)pszInput,
+                (PVOID*)&pszInput,
                 len + MAX_REST_PAYLOAD_LENGTH);
         BAIL_ON_VMDIR_ERROR(dwError);
 
-        dwError = VmRESTGetHttpPayload(pRestReq, pRestOp->pszInputJson + len, &done);
+        dwError = VmRESTGetHttpPayload(pRestReq, pszInput + len, &done);
         BAIL_ON_VMDIR_ERROR(dwError);
 
-        len = strlen(pRestOp->pszInputJson);
+        len = strlen(pszInput);
+    }
+
+    pRestOp->pjInput = json_loads(pszInput, 0, &jError);
+    if (!pRestOp->pjInput)
+    {
+        dwError = VMDIR_ERROR_INVALID_REQUEST;
+        BAIL_ON_VMDIR_ERROR(dwError);
     }
 
 cleanup:
+    VMDIR_SAFE_FREE_MEMORY(pszURI);
+    VMDIR_SAFE_FREE_MEMORY(pszInput);
     return dwError;
 
 error:
@@ -159,6 +167,7 @@ VmDirRESTOperationWriteResponse(
     dwError = VmRESTSetHttpStatusVersion(ppResponse, "HTTP/1.1");
     BAIL_ON_VMDIR_ERROR(dwError);
 
+    // TODO use pRestOp
     dwError = VmRESTSetHttpStatusCode(ppResponse, "200");
     BAIL_ON_VMDIR_ERROR(dwError);
 
@@ -217,7 +226,11 @@ VmDirFreeRESTOperation(
     {
         VMDIR_SAFE_FREE_MEMORY(pRestOp->pszMethod);
         VMDIR_SAFE_FREE_MEMORY(pRestOp->pszEndpoint);
-        VMDIR_SAFE_FREE_MEMORY(pRestOp->pszInputJson);
+        VMDIR_SAFE_FREE_MEMORY(pRestOp->pszAuth);
+        if (pRestOp->pjInput)
+        {
+            json_decref(pRestOp->pjInput);
+        }
         LwRtlHashMapClear(pRestOp->pParamMap, VmDirSimpleHashMapPairFree, NULL);
         LwRtlFreeHashMap(&pRestOp->pParamMap);
         VmDirDeleteConnection(&pRestOp->pConn);
