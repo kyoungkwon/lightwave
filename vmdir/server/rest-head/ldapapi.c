@@ -43,7 +43,7 @@ VmDirRESTLdapAdd(
     char**      ppszOutputJson
     )
 {
-    DWORD	dwError = 0;
+    DWORD   dwError = 0;
     PVDIR_ENTRY pEntry = NULL;
     PVDIR_REST_OPERATION    pRestOp = NULL;
     PVDIR_OPERATION         pAddOp = NULL;
@@ -78,7 +78,7 @@ cleanup:
 
 error:
     VMDIR_LOG_ERROR( VMDIR_LOG_MASK_ALL,
-    		"%s failed, error (%d)", __FUNCTION__, dwError);
+            "%s failed, error (%d)", __FUNCTION__, dwError);
     goto cleanup;
 }
 

@@ -200,11 +200,11 @@ error:
 
 VOID
 VmDirFreeRESTResult(
-    PVDIR_REST_RESULT	pRestRslt
+    PVDIR_REST_RESULT   pRestRslt
     )
 {
-	if (pRestRslt)
-	{
+    if (pRestRslt)
+    {
         VMDIR_SAFE_FREE_MEMORY(pRestRslt->pszErrMsg);
         if (pRestRslt->pjOutput)
         {
@@ -212,5 +212,5 @@ VmDirFreeRESTResult(
         }
         LwRtlHashMapClear(pRestRslt->pAddlInfo, VmDirSimpleHashMapPairFree, NULL);
         LwRtlFreeHashMap(&pRestRslt->pAddlInfo);
-	}
+    }
 }

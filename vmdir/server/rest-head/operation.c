@@ -29,7 +29,7 @@ VmDirRESTOperationInit(
     }
 
     dwError = VmDirAllocateMemory(
-    		sizeof(VDIR_REST_OPERATION), (PVOID*)&pRestOp);
+            sizeof(VDIR_REST_OPERATION), (PVOID*)&pRestOp);
     BAIL_ON_VMDIR_ERROR(dwError);
 
     dwError = LwRtlCreateHashMap(

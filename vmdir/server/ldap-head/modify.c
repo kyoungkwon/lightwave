@@ -53,6 +53,7 @@ VmDirPerformModify(
    ber_len_t          size = 0;
    BerValue*          pLberBerv = NULL;
    PSTR               pszLocalErrorMsg = NULL;
+   DWORD              dwModCount = 0;
 
    // Get entry DN. 'm' => reqDn.bv_val points to DN within (in-place) ber
    if ( ber_scanf( pOperation->ber, "{m", &(pOperation->reqDn.lberbv) ) == LBER_ERROR )

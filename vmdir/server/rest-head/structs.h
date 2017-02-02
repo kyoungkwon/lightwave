@@ -26,10 +26,10 @@ typedef struct _VDIR_REST_OPERATION
 {
     PSTR                pszMethod;
     PSTR                pszEndpoint;
-    PSTR				pszAuth;
+    PSTR                pszAuth;
     json_t*             pjInput;
     PLW_HASHMAP         pParamMap;
-    PVDIR_CONNECTION	pConn;
+    PVDIR_CONNECTION    pConn;
     PVDIR_REST_RESULT   pResult;
 
 } VDIR_REST_OPERATION, *PVDIR_REST_OPERATION;
