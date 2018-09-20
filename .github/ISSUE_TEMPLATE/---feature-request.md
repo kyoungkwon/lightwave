@@ -12,7 +12,7 @@ A clear and concise description of what you want to happen.
 
 **Rate the complexity of your solution**
 - [ ] Low - Very isolated and independent
-- [ ] Medium - Relatively isolated and need to rewrite/refactor existing code
+- [ ] Medium - Relatively isolated but need to rewrite/refactor existing code
 - [ ] High - Changes expected across components, might have backward compatibility issue
 
 **Describe alternatives you've considered**
