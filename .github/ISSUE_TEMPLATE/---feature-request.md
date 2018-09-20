@@ -4,7 +4,7 @@ about: "I have a suggestion (and may want to implement it \U0001F642)!"
 
 ---
 
-**Please describe the problem which you are trying solve.**
+**Please describe the problem which you are trying solve**
 A clear and concise description of the problem.
 
 **Describe the solution you'd like**
