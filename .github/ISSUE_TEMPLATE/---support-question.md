@@ -6,5 +6,3 @@ about: "If you have a question about Lightwave \U0001F4AC"
 
 You can also reach out to us via:
 - Slack: https://vmwarecode.slack.com/messages/lightwave/
-- Twitter: TBD
-- Mailing list: TBD
