@@ -16,7 +16,7 @@ A clear and concise description of what the bug is.
 A clear and concise description of what you expected to happen.
 
 **Observed behavior**
-If applicable, add screenshots to help explain your problem.
+If applicable, add command/request output (or even screenshot) to help explain your problem.
 
 **To Reproduce**
 Steps to reproduce the behavior:
