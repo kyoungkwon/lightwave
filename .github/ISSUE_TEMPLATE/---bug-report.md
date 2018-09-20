@@ -12,18 +12,18 @@ A clear and concise description of what the bug is.
 - [ ] Medium - Can be worked around
 - [ ] High - Blocker
 
+**Expected behavior**
+A clear and concise description of what you expected to happen.
+
+**Observed behavior**
+If applicable, add screenshots to help explain your problem.
+
 **To Reproduce**
 Steps to reproduce the behavior:
 1. Run command A
 2. Run command B
 3. ......
 4. See error
-
-**Expected behavior**
-A clear and concise description of what you expected to happen.
-
-**Observed behavior**
-If applicable, add screenshots to help explain your problem.
 
 **Environment:**
  - OS: [e.g. photon 2.0, ubuntu 17.04]
